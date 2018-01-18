@@ -1,5 +1,5 @@
 var Statistics;
-dhtmlxEvent(window,"load",function(){
+window.addEventListener('AfterLogin',function(){
   Statistics = newPrometList('statistics','Berichte');
   Statistics.Grid.setHeader(["Name","Status"]);
   Statistics.Grid.setColumnIds('NAME,STATUS')
