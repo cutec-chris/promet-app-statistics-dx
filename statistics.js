@@ -43,3 +43,10 @@ window.addEventListener('AfterLogin',function(){
     })==true);
   }
 });
+window.addEventListener('AfterLogout',function(){
+  Statistics.Grid.destructor();
+  Statistics.Page.remove();
+  delete Statistics;
+  Statistics = {};
+  Statistics = null;
+});
