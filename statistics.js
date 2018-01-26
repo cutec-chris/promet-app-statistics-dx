@@ -15,32 +15,49 @@ window.addEventListener('AfterLogin',function(){
     null,       // last position
     false,      // inactive
     true);
-    aForm.Tabs.tabs("content").attachHTMLString('<div id="NoContent"><p><br>keine Reports vorhanden</p></div>');
     aForm.Tabs.tabs("content").setActive();
-    aForm.Tabs.tabs("content").progressOn();
-    var bURL = '/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/.json';
-    if (window.LoadData(bURL,function(aData){
-      console.log("Report contents loaded");
-      try {
-        if ((aData)&&(aData.xmlDoc))
-        var aData2;
-        var aID;
-        if (aData.xmlDoc.responseText != '')
-          aData2 = JSON.parse(aData.xmlDoc.responseText);
-        if (aData2) {
-          for (var i = 0; i < aData2.length; i++) {
-            var aName = aData2[i].name.split('.')[0];
-            if (aData2[i].name.split('.')[aData2[i].name.split('.').length - 1] == 'pdf') {
-              aForm.Tabs.tabs("content").attachURL(GetBaseUrl()+'/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/'+aData2[i].name);
-              break;
-            }
-          }
-        }
-      } catch(err) {
-        aForm.Tabs.tabs("content").progressOff();
+    aForm.ContentForm = aForm.Tabs.tabs("content").attachForm([]);
+    aForm.OnDataUpdated = function(bForm) {
+      var aQuery = bForm.Data.Fields.querry;
+      var aRegEx = new RegExp("@(.*):(.*)@");
+      var aCont = aRegEx.exec(aQuery);
+      while (aCont.length>0) {
+        aCont.remove(0);
+        aForm.ContentForm.addItem(null,{type:"input",name:"prj_name",label:aCont[0],value:aCont[0],value:'*'})
+        aCont.remove(0);
+        aCont.remove(0);
       }
-      aForm.Tabs.tabs("content").progressOff();
-    })==true);
+      aForm.ContentForm.addItem(null,{type:"button",name:"execute",value:"Ausführen"})
+      aForm.ContentForm.attachEvent("onButtonClick", function(id) {
+        if (id=='execute') {
+          //aForm.Tabs.tabs("content").attachHTMLString('<div id="NoContent"><p><br>keine Reports vorhanden</p></div>');
+          aForm.Tabs.tabs("content").progressOn();
+          var bURL = '/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/.json';
+          if (window.LoadData(bURL,function(aData){
+            console.log("Report contents loaded");
+            try {
+              if ((aData)&&(aData.xmlDoc))
+              var aData2;
+              var aID;
+              if (aData.xmlDoc.responseText != '')
+                aData2 = JSON.parse(aData.xmlDoc.responseText);
+              if (aData2) {
+                for (var i = 0; i < aData2.length; i++) {
+                  var aName = aData2[i].name.split('.')[0];
+                  if (aData2[i].name.split('.')[aData2[i].name.split('.').length - 1] == 'pdf') {
+                    aForm.Tabs.tabs("content").attachURL(GetBaseUrl()+'/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/'+aData2[i].name);
+                    break;
+                  }
+                }
+              }
+            } catch(err) {
+              aForm.Tabs.tabs("content").progressOff();
+            }
+            aForm.Tabs.tabs("content").progressOff();
+          })==true);
+        }
+      });
+    }
   }
 });
 window.addEventListener('AfterLogout',function(){
