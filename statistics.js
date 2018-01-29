@@ -38,7 +38,14 @@ window.addEventListener('AfterLogin',function(){
             for (var i = 0; i < aData2.length; i++) {
               var aName = aData2[i].name.split('.')[0];
               if (aData2[i].name.split('.')[aData2[i].name.split('.').length - 1] == 'png') {
-                aForm.Tabs.tabs("content").attachURL(GetBaseUrl()+'/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/'+aData2[i].name);
+                var aUrl = GetBaseUrl()+'/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/'+aData2[i].name;
+                aUrl += '?exec=1';
+                aForm.ContentForm.forEachItem(function(name){
+                  if (aForm.ContentForm.getUserData(name, "statistics", "n") == 'y')
+                    aUrl += '&'+name+'='+aForm.ContentForm.getItemValue(name);
+                });
+
+                aForm.Tabs.tabs("content").attachURL(aUrl);
                 aForm.Tabs.attachEvent("onContentLoaded", function(){
                   aForm.Tabs.tabs("content").progressOff();
                 });
@@ -69,7 +76,7 @@ window.addEventListener('AfterLogin',function(){
       //add actual statistic items
       while ((aCont) && (aCont.length>0)) {
         aCont.remove(0);
-        aForm.ContentForm.addItem(null,{type:"input",name:"prj_name",label:aCont[0],value:aCont[0],value:'*'})
+        aForm.ContentForm.addItem(null,{type:"input",name:aCont[0],label:aCont[0],value:aCont[0],value:'*'})
         aForm.ContentForm.setUserData(aCont[0],'statistics','y');
         HasControls = true;
         aCont.remove(0);
