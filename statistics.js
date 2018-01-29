@@ -28,7 +28,6 @@ window.addEventListener('AfterLogin',function(){
       aForm.Tabs.tabs("content").progressOn();
       var bURL = '/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/.json';
       if (window.LoadData(bURL,function(aData){
-        console.log("Report contents loaded");
         try {
           if ((aData)&&(aData.xmlDoc))
           var aData2;
@@ -40,20 +39,28 @@ window.addEventListener('AfterLogin',function(){
               var aName = aData2[i].name.split('.')[0];
               if (aData2[i].name.split('.')[aData2[i].name.split('.').length - 1] == 'png') {
                 aForm.Tabs.tabs("content").attachURL(GetBaseUrl()+'/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/'+aData2[i].name);
+                aForm.Tabs.attachEvent("onContentLoaded", function(){
+                  aForm.Tabs.tabs("content").progressOff();
+                });
                 break;
               }
             }
           }
         } catch(err) {
           aForm.Tabs.tabs("content").progressOff();
+          dhtmlx.message({
+            type : "error",
+            text: err.message,
+            expire: 3000
+          });
         }
-        aForm.Tabs.tabs("content").progressOff();
       })==true);
     }
     aForm.OnDataUpdated = function(bForm) {
       var aQuery = bForm.Data.Fields.querry;
       var aRegEx = new RegExp("@(.*):(.*)@");
       var aCont = aRegEx.exec(aQuery);
+      var HasControls = false;
       //remove statistic items
       aForm.ContentForm.forEachItem(function(name){
         if (aForm.ContentForm.getUserData(name, "statistics", "n") == 'y')
@@ -64,6 +71,7 @@ window.addEventListener('AfterLogin',function(){
         aCont.remove(0);
         aForm.ContentForm.addItem(null,{type:"input",name:"prj_name",label:aCont[0],value:aCont[0],value:'*'})
         aForm.ContentForm.setUserData(aCont[0],'statistics','y');
+        HasControls = true;
         aCont.remove(0);
         aCont.remove(0);
       }
@@ -76,6 +84,9 @@ window.addEventListener('AfterLogin',function(){
           }
         });
       }
+      //load Contents
+      if (!HasControls)
+        aForm.DoExecute();
     }
   }
 });
