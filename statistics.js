@@ -29,6 +29,7 @@ window.addEventListener('AfterLogin',function(){
       var bURL = '/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/.json';
       if (window.LoadData(bURL,function(aData){
         try {
+          var reportloaded = false;
           if ((aData)&&(aData.xmlDoc))
           var aData2;
           var aID;
@@ -44,14 +45,20 @@ window.addEventListener('AfterLogin',function(){
                   if (aForm.ContentForm.getUserData(name, "statistics", "n") == 'y')
                     aUrl += '&'+name+'='+aForm.ContentForm.getItemValue(name);
                 });
-
+                reportloaded = true;
                 aForm.Tabs.tabs("content").attachURL(aUrl);
-                aForm.Tabs.attachEvent("onContentLoaded", function(){
+                aForm.Tabs.attachEvent("onContentLoaded", function() {
                   aForm.Tabs.tabs("content").progressOff();
+                  var images = aForm.Tabs.tabs("content").getFrame.document.getElementsByTagName('img');
+                  images[0].style.width = images[0].naturalWidth;
                 });
                 break;
               }
             }
+          }
+          if (!reportloaded) {
+            aForm.Tabs.tabs("content").progressOff();
+            aForm.Tabs.tabs("content").attachHTMLString('<div>kein Report gefunden !</div>');
           }
         } catch(err) {
           aForm.Tabs.tabs("content").progressOff();
