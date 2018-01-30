@@ -101,6 +101,20 @@ window.addEventListener('AfterLogin',function(){
           }
         });
       }
+      HasControls = false;
+      aForm.ContentForm.forEachItem(function(name){
+        if (aForm.ContentForm.getUserData(name, "statistics", "n") == 'y') {
+          if (aForm.Params.indexOf(name+'=')>-1) {
+            var tmp = aForm.Params.substring(aForm.Params.indexOf(name+'='),aForm.Params.length);
+            tmp = tmp.substring(tmp.indexOf('=')+1,tmp.length);
+            if (tmp.indexOf('?')>0)
+              tmp = tmp.substring(0,tmp.indexOf('?'));
+            aForm.ContentForm.setItemValue(name,tmp);
+          } else {
+            HasControls = true;
+          }
+        }
+      });
       //load Contents
       if (!HasControls)
         aForm.DoExecute();
