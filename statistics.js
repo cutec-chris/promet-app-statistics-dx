@@ -80,6 +80,7 @@ window.addEventListener('AfterLogin',function(){
         if (aForm.ContentForm.getUserData(name, "statistics", "n") == 'y')
           aForm.ContentForm.removeItem(name);
       });
+      var aHeight = 70;
       //add actual statistic items
       while ((aCont) && (aCont.length>0)) {
         aCont.remove(0);
@@ -88,6 +89,8 @@ window.addEventListener('AfterLogin',function(){
         HasControls = true;
         aCont.remove(0);
         aCont.remove(0);
+        aHeight += 70;
+        aForm.Layout.cells('a').setHeight(aHeight);
       }
       //add button
       if (aForm.ContentForm != aForm.Form) {
