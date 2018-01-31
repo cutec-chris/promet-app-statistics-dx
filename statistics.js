@@ -103,6 +103,7 @@ window.addEventListener('AfterLogin',function(){
       }
       HasControls = false;
       aForm.ContentForm.forEachItem(function(name){
+        if (aForm.Params) {
         if (aForm.ContentForm.getUserData(name, "statistics", "n") == 'y') {
           if (aForm.Params.indexOf(name+'=')>-1) {
             var tmp = aForm.Params.substring(aForm.Params.indexOf(name+'='),aForm.Params.length);
@@ -113,6 +114,7 @@ window.addEventListener('AfterLogin',function(){
           } else {
             HasControls = true;
           }
+        }
         }
       });
       //load Contents
