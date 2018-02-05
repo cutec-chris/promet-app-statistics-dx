@@ -38,7 +38,7 @@ window.addEventListener('AfterLogin',function(){
           if (aData2) {
             for (var i = 0; i < aData2.length; i++) {
               var aName = aData2[i].name.split('.')[0];
-              if (aData2[i].name.split('.')[aData2[i].name.split('.').length - 1] == 'png') {
+              if (aData2[i].name.split('.')[aData2[i].name.split('.').length - 1] == 'html') {
                 var aUrl = GetBaseUrl()+'/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/'+aData2[i].name;
                 aUrl += '?exec=1';
                 aForm.ContentForm.forEachItem(function(name){
