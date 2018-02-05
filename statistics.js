@@ -30,11 +30,11 @@ window.addEventListener('AfterLogin',function(){
       if (window.LoadData(bURL,function(aData){
         try {
           var reportloaded = false;
-          if ((aData)&&(aData.xmlDoc))
           var aData2;
           var aID;
-          if (aData.xmlDoc.responseText != '')
-            aData2 = JSON.parse(aData.xmlDoc.responseText);
+          if ((aData)&&(aData.xmlDoc))
+            if (aData.xmlDoc.responseText != '')
+              aData2 = JSON.parse(aData.xmlDoc.responseText);
           if (aData2) {
             for (var i = 0; i < aData2.length; i++) {
               var aName = aData2[i].name.split('.')[0];
@@ -111,15 +111,20 @@ window.addEventListener('AfterLogin',function(){
             if (tmp.indexOf('?')>0)
               tmp = tmp.substring(0,tmp.indexOf('?'));
             aForm.ContentForm.setItemValue(name,tmp);
+            if (tmp == '*') HasControls = true;
           } else {
             HasControls = true;
           }
         }
-        }
+      } else {
+        HasControls = true;
+      }
       });
       //load Contents
-      if (!HasControls)
-        aForm.DoExecute();
+      window.setTimeout(function(){
+        if (!HasControls)
+          aForm.DoExecute();
+        },500);
     }
   }
 });
