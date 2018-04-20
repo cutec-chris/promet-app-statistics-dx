@@ -46,9 +46,13 @@ window.addEventListener('AfterLogin',function(){
                     aUrl += '&'+name+'='+aForm.ContentForm.getItemValue(name);
                 });
                 reportloaded = true;
-                aUrl = '<body><object style="width: 100%;height:100%" data="'+aUrl+'" type="application/pdf"><embed src="'+aUrl+'" type="application/pdf" /></object></body>';
-                aForm.Tabs.tabs("content").attachHTMLString(aUrl)
-                aForm.Tabs.tabs("content").progressOff();
+                if (window.LoadData(aURL,function(aData){
+                  if ((aData)&&(aData.xmlDoc))
+                    if (aData.xmlDoc.responseText != '') {
+                      aForm.Tabs.tabs("content").attachUrl(aUrl);
+                    }
+                  aForm.Tabs.tabs("content").progressOff();
+                })==true);
                 break;
               }
             }
