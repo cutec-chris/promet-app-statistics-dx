@@ -22,9 +22,8 @@ window.addEventListener('AfterLogin',function(){
         aForm.DoExecute();
       }
     });
-    aForm.ContentForm = aForm.Form;//aForm.Tabs.tabs("content").attachForm([]);
+    aForm.ContentForm = aForm.Form;
     aForm.DoExecute = function() {
-      //aForm.Tabs.tabs("content").attachHTMLString('<div id="NoContent"><p><br>keine Reports vorhanden</p></div>');
       aForm.Tabs.tabs("content").progressOn();
       var bURL = '/'+aForm.TableName+'/by-id/'+aForm.Id+'/reports/.json';
       if (window.LoadData(bURL,function(aData){
@@ -46,13 +45,38 @@ window.addEventListener('AfterLogin',function(){
                     aUrl += '&'+name+'='+aForm.ContentForm.getItemValue(name);
                 });
                 reportloaded = true;
-                if (window.LoadData(aURL,function(aData){
+                if (window.LoadData(aUrl,function(aData){
                   if ((aData)&&(aData.xmlDoc))
-                    if (aData.xmlDoc.responseText != '') {
-                      aForm.Tabs.tabs("content").attachUrl(aUrl);
+                    if (aData.xmlDoc.status==200) {
+                      var aContent = aForm.Tabs.tabs("content");
+                      aContent.attachURL(GetBaseUrl()+'/appbase/pdfview.html');
+                      aForm.Tabs.attachEvent("onContentLoaded", function(id){
+                        if (id=="content") {
+                          var aFrame = aContent.getFrame().contentWindow;
+                          try {
+                            var reader = new FileReader();
+                            reader.addEventListener('loadend', function() {
+                              PDFJS.getDocument(this.result).then(function(doc) {
+                                  aFrame.renderPdf(doc);
+                                });
+                            });
+                            reader.readAsArrayBuffer(aData.xmlDoc.response);                            
+                          } catch(err) {
+                            console.log(err.message);
+                            dhtmlx.message({
+                              type : "error",
+                              text: err.message,
+                              expire: 3000
+                            });
+                          }  
+                        }
+                      });
+
+                    } else {
+                      aForm.Tabs.tabs("content").attachHTMLString('<div id="NoContent"><p><br>Fehler beim laden des Reports</p><p>'+aData.xmlDoc.responseText+'</p></div>');
                     }
                   aForm.Tabs.tabs("content").progressOff();
-                })==true);
+                },null,"blob")==true);
                 break;
               }
             }
@@ -63,6 +87,7 @@ window.addEventListener('AfterLogin',function(){
           }
         } catch(err) {
           aForm.Tabs.tabs("content").progressOff();
+          console.log(err.message);
           dhtmlx.message({
             type : "error",
             text: err.message,
