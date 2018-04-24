@@ -16,7 +16,9 @@ window.addEventListener('AfterLogin',function(){
     false,      // inactive
     true);
     aForm.Tabs.tabs("content").setActive();
-    aForm.Toolbar.addButton('execute', 3, 'Ausführen', 'fa fa-chart');
+    aForm.Toolbar.removeItem('save');
+    aForm.Toolbar.removeItem('abort');
+    aForm.Toolbar.addButton('execute', 3, 'Ausführen', 'fa fa-pie-chart');
     aForm.Toolbar.attachEvent("onClick", function(id) {
       if (id=='execute') {
         aForm.DoExecute();
@@ -57,7 +59,10 @@ window.addEventListener('AfterLogin',function(){
                             var reader = new FileReader();
                             reader.addEventListener('loadend', function() {
                               var aPdf = aFrame.loadPdf({data:this.result});
+                              aBlob = null;
+                              reader = null;
                             });
+                            aBlob = null;
                             var aBlob = new Blob([aData.xmlDoc.response], {type: "application/octet-stream"})
                             reader.readAsArrayBuffer(aBlob); 
                           } catch(err) {
