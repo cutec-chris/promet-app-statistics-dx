@@ -56,11 +56,10 @@ window.addEventListener('AfterLogin',function(){
                           try {
                             var reader = new FileReader();
                             reader.addEventListener('loadend', function() {
-                              PDFJS.getDocument(this.result).then(function(doc) {
-                                  aFrame.renderPdf(doc);
-                                });
+                              var aPdf = aFrame.loadPdf({data:this.result});
                             });
-                            reader.readAsArrayBuffer(aData.xmlDoc.response);                            
+                            var aBlob = new Blob([aData.xmlDoc.response], {type: "application/octet-stream"})
+                            reader.readAsArrayBuffer(aBlob); 
                           } catch(err) {
                             console.log(err.message);
                             dhtmlx.message({
@@ -76,7 +75,7 @@ window.addEventListener('AfterLogin',function(){
                       aForm.Tabs.tabs("content").attachHTMLString('<div id="NoContent"><p><br>Fehler beim laden des Reports</p><p>'+aData.xmlDoc.responseText+'</p></div>');
                     }
                   aForm.Tabs.tabs("content").progressOff();
-                },null,"blob")==true);
+                },null,"arraybuffer")==true);
                 break;
               }
             }
