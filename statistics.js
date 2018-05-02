@@ -102,7 +102,7 @@ window.addEventListener('AfterLogin',function(){
     }
     aForm.OnDataUpdated = function(bForm) {
       var aQuery = bForm.Data.Fields.querry;
-      var aRegEx = new RegExp("@(.*):(.*)@");
+      var aRegEx = new RegExp("@(.*?):(.*?)@");
       var aCont = aRegEx.exec(aQuery);
       var HasControls = false;
       //remove statistic items
