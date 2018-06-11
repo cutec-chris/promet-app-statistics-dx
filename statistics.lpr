@@ -1,15 +1,16 @@
 library statistics;
-  uses js, web, classes, Avamm;
+  uses js, web, classes, Avamm, webrouter;
 
-procedure DoLogin;
+resourcestring
+  strReports             = 'Berichte';
+
+Procedure ShowStatistics(URl : String; aRoute : TRoute; Params: TStrings);
 begin
-  writeln('Login to module Statistics');
-end;
-procedure DoLogout;
-begin
+  writeln('Statistics should be shown');
 end;
 
 initialization
   writeln('Hello World from Statistics...');
+  RegisterSidebarRoute(strReports,'statistics',@ShowStatistics);
 end.
 
