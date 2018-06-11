@@ -1,5 +1,15 @@
 library statistics;
   uses js, web, classes, Avamm;
+
+procedure DoLogin;
 begin
-  writeln('Statistics Moudule will be initialized...')
+  writeln('Login to module Statistics');
+end;
+procedure DoLogout;
+begin
+end;
+
+initialization
+  writeln('Hello World from Statistics...');
 end.
+

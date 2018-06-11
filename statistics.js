@@ -2,6 +2,6 @@
   "use strict";
   var $mod = this;
   $mod.$init = function () {
-    pas.System.Writeln("Statistics Moudule will be initialized...");
+    pas.System.Writeln("Hello World from Statistics...");
   };
 });
