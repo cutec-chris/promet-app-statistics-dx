@@ -5,18 +5,25 @@ resourcestring
   strReports             = 'Berichte';
 
 var
-  List : TAvammListForm;
+  Statistics : TAvammListForm = nil;
 
 Procedure ShowStatistics(URl : String; aRoute : TRoute; Params: TStrings);
 var
-  aParent: JSValue;
+  aParent: TJSHTMLElement;
 begin
   writeln('Statistics should be shown');
-  if not Assigned(List) then
+  if Statistics = nil then
     begin
-      aParent := GetAvammContainer();
-      List := TAvammListForm.Create(aParent,'statistics');
+      aParent := TJSHTMLElement(GetAvammContainer());
+      Statistics := TAvammListForm.Create(aParent,'statistics');
+      Statistics.Grid.setHeader('Name,Status',',',TJSArray._of([]));
+      Statistics.Grid.setColumnIds('NAME,STATUS');
+      Statistics.Grid.setColTypes('ro,ro');
+      Statistics.Grid.attachHeader('#text_filter,#text_filter');
+      Statistics.Grid.setInitWidths('*,100');
+      Statistics.Grid.init();
     end;
+  Statistics.Show;
 end;
 
 initialization
