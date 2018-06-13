@@ -23,3 +23,4 @@
     pas.Avamm.RegisterSidebarRoute(rtl.getResStr(pas.statistics,"strReports"),"statistics",$mod.ShowStatistics);
   };
 });
+//# sourceMappingURL=statistics.js.map

@@ -117,7 +117,7 @@
     </Linking>
     <Other>
       <ExecuteBefore>
-        <Command Value="pas2js -Tbrowser -vt -Fu../appbase -Fu../appbase/dhtmlx-for-pas2js $Name($(ProjFile))"/>
+        <Command Value="pas2js -Tbrowser -Jminclude -vt -Fu../appbase -Fu../appbase/dhtmlx-for-pas2js $Name($(ProjFile))"/>
         <ScanForFPCMsgs Value="True"/>
       </ExecuteBefore>
     </Other>
