@@ -7,11 +7,17 @@ resourcestring
 var
   Statistics : TAvammListForm = nil;
 
+Procedure ShowStatistic(URl : String; aRoute : TRoute; Params: TStrings);
+var
+  aForm: TAvammForm;
+begin
+  aForm := TAvammForm.Create(fmWindow,'statistics',Params.Values['Id']);
+end;
+
 Procedure ShowStatistics(URl : String; aRoute : TRoute; Params: TStrings);
 var
   aParent: TJSHTMLElement;
 begin
-  writeln('Statistics should be shown');
   if Statistics = nil then
     begin
       aParent := TJSHTMLElement(GetAvammContainer());
@@ -29,5 +35,6 @@ end;
 initialization
   writeln('Hello World from Statistics...');
   RegisterSidebarRoute(strReports,'statistics',@ShowStatistics);
+  Router.RegisterRoute('/statistics/by-id/:Id/',@ShowStatistic);
 end.
 
