@@ -1,6 +1,6 @@
 library statistics;
   uses js, web, classes, Avamm, webrouter, AvammForms, dhtmlx_base,
-    dhtmlx_form,SysUtils;
+    dhtmlx_form,SysUtils, Types;
 
 type
 
@@ -20,6 +20,7 @@ resourcestring
   strContent             = 'Inhalt';
   strExecute             = 'Ausführen';
   strNoReport            = 'kein Bericht verfügbar !';
+  strSettings            = 'Einstellungen';
 
 var
   Statistics : TAvammListForm = nil;
@@ -50,8 +51,8 @@ end;
 procedure TStatisticsForm.DoLoadData;
 begin
   CreateForm;
-  DoOpen;
   inherited;
+  DoOpen;
 end;
 procedure TStatisticsForm.CreateForm;
   procedure ToolbarButtonClick(id : string);
@@ -66,12 +67,46 @@ begin
   Tabs.addTab('content',strContent,100,0,true,false);
   Tabs.cells('content').hide;
   Toolbar.addButton('execute',0,strExecute,'fa fa-pie-chart','fa fa-pie-chart');
+  Form.addItem(null,js.new(['type','label','label',strSettings,'hidden',true,'name','lSettings']));
   Toolbar.attachEvent('onClick', @ToolbarButtonClick);
   ContentForm := Form;
 end;
 procedure TStatisticsForm.DoOpen;
+  procedure CheckRemoveItem(aName : string);
+  begin
+    if ContentForm.getUserData(aName,'statistics','n')='y' then
+      ContentForm.removeItem(aName);
+  end;
+var
+  aQuerry: string;
+  aRegex: TJSRegexp;
+  aCont: TStringDynArray;
+  HasControls: Boolean;
+  aHeight, i: Integer;
 begin
-
+  aQuerry := string(TJSObject(Data.Properties['Fields']).Properties['querry']);
+  aRegex := TJSRegexp.New('@(.*?):(.*?)@');
+  aCont := aRegex.exec(aQuerry);
+  HasControls := False;
+  ContentForm.forEachItem(@CheckRemoveItem);
+  aHeight := 70;
+  i := 0;
+  while i < length(aCont) do
+    begin
+      inc(i);
+      ContentForm.addItem(null,js.new(['type','input','name',aCont[i],'label',aCont[i],'value','*']));
+      ContentForm.setUserData(aCont[i],'statistics','y');
+      HasControls:=True;
+      inc(i,2);
+      aHeight:=aHeight+70;
+    end;
+  if HasControls then
+    ContentForm.showItem('lSettings')
+  else
+    ContentForm.hideItem('lSettings');
+  Layout.cells('a').setHeight(aHeight);
+  if not HasControls then
+    DoExecute;
 end;
 procedure TStatisticsForm.DoExecute;
   function DoShowPDF(aValue: TJSXMLHttpRequest): JSValue;
@@ -81,11 +116,12 @@ procedure TStatisticsForm.DoExecute;
       aRequest: TJSXMLHttpRequest;
     begin
       aFrame := Tabs.cells('content').getFrame;
+      aFrame.onerror:=@Avamm.WindowError;
       aRequest := aValue;
       Tabs.cells('content').show;
+      Tabs.cells('content').setActive;
       Layout.progressOff;
       asm
-        try {
           aFrame = aFrame.contentWindow;
           var reader = new FileReader();
           reader.addEventListener('loadend', function() {
@@ -96,14 +132,6 @@ procedure TStatisticsForm.DoExecute;
           aBlob = null;
           var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
           reader.readAsArrayBuffer(aBlob);
-        } catch(err) {
-          console.log(err.message);
-          dhtmlx.message({
-            type : "error",
-            text: err.message,
-            expire: 3000
-          });
-        }
       end;
     end;
   begin
@@ -130,16 +158,15 @@ procedure TStatisticsForm.DoExecute;
         aUrl := aUrl+'&'+aParam+'='+string(ContentForm.getItemValue(aParam));
     end;
   begin
-    aReports := TJSArray(TJSJSON.parse(aValue.responseText));
     //Build Params
-    for i := 0 to aReports.length-1 do
+    for i := 0 to Reports.length-1 do
       begin
-        aName := string(TJSObject(aReports[i]).Properties['name']);
+        aName := string(TJSObject(Reports[i]).Properties['name']);
         aExt := copy(aName,pos('.',aName)+1,length(aName));
         aName := copy(aName,0,pos('.',aName)-1);
         if aExt = 'pdf' then
           begin
-            aUrl := '/'+TableName+'/by-id/'+string(Id)+'/reports/'+string(TJSObject(aReports[i]).Properties['name']);
+            aUrl := '/'+TableName+'/by-id/'+string(Id)+'/reports/'+string(TJSObject(Reports[i]).Properties['name']);
             aUrl := aUrl+'?exec=1';
             ContentForm.forEachItem(@AddParamToUrl);
             //Load PDF
@@ -158,8 +185,8 @@ procedure TStatisticsForm.DoExecute;
   end;
 begin
   Layout.progressOn;
-  LoadData('/'+Tablename+'/by-id/'+string(Id)+'/reports/.json')._then(TJSPromiseresolver(@DoLoadPDF))
-                                                               .catch(@ShowLoadingError);
+  ReportsLoaded._then(TJSPromiseresolver(@DoLoadPDF))
+               .catch(@ShowLoadingError);
 end;
 
 initialization
