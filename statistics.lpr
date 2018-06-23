@@ -28,7 +28,7 @@ Procedure ShowStatistic(URl : String; aRoute : TRoute; Params: TStrings);
 var
   aForm: TAvammForm;
 begin
-  aForm := TStatisticsForm.Create(fmWindow,'statistics',Params.Values['Id']);
+  aForm := TStatisticsForm.Create(fmTab,'statistics',Params.Values['Id']);
 end;
 Procedure ShowStatistics(URl : String; aRoute : TRoute; Params: TStrings);
 var

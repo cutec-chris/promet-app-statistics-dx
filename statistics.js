@@ -133,7 +133,7 @@
   this.Statistics = null;
   this.ShowStatistic = function (URl, aRoute, Params) {
     var aForm = null;
-    aForm = $mod.TStatisticsForm.$create("Create$1",[pas.AvammForms.TAvammFormMode.fmWindow,"statistics",Params.GetValue("Id")]);
+    aForm = $mod.TStatisticsForm.$create("Create$1",[pas.AvammForms.TAvammFormMode.fmTab,"statistics",Params.GetValue("Id")]);
   };
   this.ShowStatistics = function (URl, aRoute, Params) {
     var aParent = null;
