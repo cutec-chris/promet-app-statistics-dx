@@ -28,7 +28,7 @@ Procedure ShowStatistic(URl : String; aRoute : TRoute; Params: TStrings);
 var
   aForm: TAvammForm;
 begin
-  aForm := TStatisticsForm.Create(fmTab,'statistics',Params.Values['Id']);
+  aForm := TStatisticsForm.Create(fmTab,'statistics',Params.Values['Id'],Params.Values['Params']);
 end;
 Procedure ShowStatistics(URl : String; aRoute : TRoute; Params: TStrings);
 var
@@ -95,6 +95,8 @@ begin
     begin
       inc(i);
       ContentForm.addItem(null,js.new(['type','input','name',aCont[i],'label',aCont[i],'value','*']));
+      if Params.Values[aCont[i]]<>'' then
+        ContentForm.setItemValue(aCont[i],Params.Values[aCont[i]]);
       ContentForm.setUserData(aCont[i],'statistics','y');
       HasControls:=True;
       inc(i,2);
@@ -122,16 +124,16 @@ procedure TStatisticsForm.DoExecute;
       Tabs.cells('content').setActive;
       Layout.progressOff;
       asm
-          aFrame = aFrame.contentWindow;
-          var reader = new FileReader();
-          reader.addEventListener('loadend', function() {
-            var aPdf = aFrame.loadPdf({data:this.result});
-            aBlob = null;
-            reader = null;
-          });
+        aFrame = aFrame.contentWindow;
+        var reader = new FileReader();
+        reader.addEventListener('loadend', function() {
+          var aPdf = aFrame.loadPdf({data:this.result});
           aBlob = null;
-          var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
-          reader.readAsArrayBuffer(aBlob);
+          reader = null;
+        });
+        aBlob = null;
+        var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
+        reader.readAsArrayBuffer(aBlob);
       end;
     end;
   begin
@@ -191,6 +193,6 @@ end;
 
 initialization
   RegisterSidebarRoute(strReports,'statistics',@ShowStatistics);
-  Router.RegisterRoute('/statistics/by-id/:Id/',@ShowStatistic);
+  Router.RegisterRoute('/statistics/by-id/:Id/:Params',@ShowStatistic);
 end.
 
