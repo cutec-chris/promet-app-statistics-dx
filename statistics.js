@@ -50,6 +50,7 @@
       while (i < rtl.length(aCont)) {
         i += 1;
         Self.ContentForm.addItem(null,pas.JS.New(["type","input","name",aCont[i],"label",aCont[i],"value","*"]));
+        if (Self.FParams.GetValue(aCont[i]) !== "") Self.ContentForm.setItemValue(aCont[i],Self.FParams.GetValue(aCont[i]));
         Self.ContentForm.setUserData(aCont[i],"statistics","y");
         HasControls = true;
         i += 2;
@@ -133,7 +134,7 @@
   this.Statistics = null;
   this.ShowStatistic = function (URl, aRoute, Params) {
     var aForm = null;
-    aForm = $mod.TStatisticsForm.$create("Create$1",[pas.AvammForms.TAvammFormMode.fmTab,"statistics",Params.GetValue("Id")]);
+    aForm = $mod.TStatisticsForm.$create("Create$1",[pas.AvammForms.TAvammFormMode.fmTab,"statistics",Params.GetValue("Id"),Params.GetValue("Params")]);
   };
   this.ShowStatistics = function (URl, aRoute, Params) {
     var aParent = null;
@@ -152,7 +153,7 @@
   $mod.$resourcestrings = {strReports: {org: "Berichte"}, strContent: {org: "Inhalt"}, strExecute: {org: "Ausführen"}, strNoReport: {org: "kein Bericht verfügbar !"}, strSettings: {org: "Einstellungen"}};
   $mod.$init = function () {
     pas.Avamm.RegisterSidebarRoute(rtl.getResStr(pas.statistics,"strReports"),"statistics",$mod.ShowStatistics);
-    pas.webrouter.Router().RegisterRoute("\/statistics\/by-id\/:Id\/",$mod.ShowStatistic,false);
+    pas.webrouter.Router().RegisterRoute("\/statistics\/by-id\/:Id\/:Params",$mod.ShowStatistic,false);
   };
 });
 //# sourceMappingURL=statistics.js.map
