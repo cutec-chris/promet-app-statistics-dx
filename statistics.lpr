@@ -84,7 +84,7 @@ var
   HasControls: Boolean;
   aHeight, i: Integer;
 begin
-  aQuerry := string(TJSObject(Data.Properties['Fields']).Properties['querry']);
+  aQuerry := string(Data.Properties['QUERRY']);
   aRegex := TJSRegexp.New('@(.*?):(.*?)@');
   aCont := aRegex.exec(aQuerry);
   HasControls := False;

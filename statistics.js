@@ -40,7 +40,7 @@
       var HasControls = false;
       var aHeight = 0;
       var i = 0;
-      aQuerry = "" + rtl.getObject(Self.FData["Fields"])["querry"];
+      aQuerry = "" + Self.FData["QUERRY"];
       aRegex = new RegExp("@(.*?):(.*?)@");
       aCont = aRegex.exec(aQuerry);
       HasControls = false;
@@ -134,7 +134,7 @@
   this.Statistics = null;
   this.ShowStatistic = function (URl, aRoute, Params) {
     var aForm = null;
-    aForm = $mod.TStatisticsForm.$create("Create$1",[pas.AvammForms.TAvammFormMode.fmTab,"statistics",Params.GetValue("Id"),Params.GetValue("Params")]);
+    aForm = $mod.TStatisticsForm.$create("Create$1",[pas.AvammForms.TAvammFormMode.fmInlineWindow,"statistics",Params.GetValue("Id"),Params.GetValue("Params")]);
   };
   this.ShowStatistics = function (URl, aRoute, Params) {
     var aParent = null;
