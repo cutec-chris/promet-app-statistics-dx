@@ -204,7 +204,8 @@ begin
 end;
 
 initialization
-  RegisterSidebarRoute(strReports,'statistics',@ShowStatistics);
+  if getRight('STATISTICS')>0 then
+    RegisterSidebarRoute(strReports,'statistics',@ShowStatistics);
   Router.RegisterRoute('/statistics/by-id/:Id/:Params',@ShowStatistic);
 end.
 
