@@ -38,8 +38,10 @@
       var aRegex = null;
       var aCont = [];
       var HasControls = false;
+      var DontExecute = false;
       var aHeight = 0;
       var i = 0;
+      DontExecute = false;
       aQuerry = "" + Self.FData["QUERRY"];
       aRegex = new RegExp("@(.*?):(.*?)@");
       aCont = aRegex.exec(aQuerry);
@@ -50,7 +52,9 @@
       while (i < rtl.length(aCont)) {
         i += 1;
         Self.ContentForm.addItem(null,pas.JS.New(["type","input","name",aCont[i],"label",aCont[i],"value","*"]));
-        if (Self.FParams.GetValue(aCont[i]) !== "") Self.ContentForm.setItemValue(aCont[i],Self.FParams.GetValue(aCont[i]));
+        if (Self.FParams.GetValue(aCont[i]) !== "") {
+          Self.ContentForm.setItemValue(aCont[i],Self.FParams.GetValue(aCont[i]))}
+         else DontExecute = true;
         Self.ContentForm.setUserData(aCont[i],"statistics","y");
         HasControls = true;
         i += 2;
@@ -60,7 +64,7 @@
         Self.ContentForm.showItem("lSettings")}
        else Self.ContentForm.hideItem("lSettings");
       Self.Layout.cells("a").setHeight(aHeight);
-      if (!HasControls) Self.DoExecute();
+      if (!DontExecute) Self.DoExecute();
     };
     this.DoExecute = function () {
       var Self = this;
@@ -69,32 +73,36 @@
         function PDFIsLoaded() {
           var aFrame = null;
           var aRequest = null;
-          aFrame = Self.Tabs.cells("content").getFrame();
-          aFrame.onerror = pas.Avamm.WindowError;
-          aRequest = aValue;
-          Self.Tabs.cells("content").show();
-          Self.Tabs.cells("content").setActive();
-          Self.Layout.progressOff();
-          aFrame = aFrame.contentWindow;
-          var reader = new FileReader();
-          reader.addEventListener('loadend', function() {
-            var aPdf = aFrame.loadPdf({data:this.result});
+          if (aValue.status !== 200) {
+            Self.Layout.progressOff();
+            dhtmlx.message(pas.JS.New(["type","error","text",aValue.responseText]));
+            Self.Tabs.cells("content").hide();
+          } else {
+            aFrame = Self.Tabs.cells("content").getFrame();
+            pas.Avamm.InitWindow(aFrame);
+            aRequest = aValue;
+            Self.Tabs.cells("content").show();
+            Self.Tabs.cells("content").setActive();
+            Self.Layout.progressOff();
+            aFrame = aFrame.contentWindow;
+            var reader = new FileReader();
+            reader.addEventListener('loadend', function() {
+              var aPdf = aFrame.loadPdf({data:this.result});
+              aBlob = null;
+              reader = null;
+            });
             aBlob = null;
-            reader = null;
-          });
-          aBlob = null;
-          var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
-          reader.readAsArrayBuffer(aBlob);
+            reader.addEventListener("onerror", function (error) {
+                  throw error;
+                }, false);
+            var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
+            reader.readAsArrayBuffer(aBlob);
+          };
         };
         var $with1 = Self.Tabs.cells("content");
         $with1.attachURL("\/appbase\/pdfview.html");
+        pas.Avamm.InitWindow($with1.getFrame());
         Self.Tabs.attachEvent("onContentLoaded",PDFIsLoaded);
-        return Result;
-      };
-      function ShowLoadingError(aValue) {
-        var Result = undefined;
-        Self.Layout.progressOff();
-        dhtmlx.message(pas.JS.New(["type","error","text",aValue]));
         return Result;
       };
       function DoLoadPDF(aValue) {
@@ -116,7 +124,7 @@
             aUrl = (((("\/" + Self.FTablename) + "\/by-id\/") + ("" + Self.FID)) + "\/reports\/") + ("" + rtl.getObject(Self.Reports[i])["name"]);
             aUrl = aUrl + "?exec=1";
             Self.ContentForm.forEachItem(AddParamToUrl);
-            pas.Avamm.LoadData(aUrl,false,"text\/json",4000).then(DoShowPDF).catch(ShowLoadingError);
+            pas.Avamm.LoadData(aUrl,false,"text\/json",4000).then(DoShowPDF);
             ReportLoaded = true;
           };
         };
@@ -128,7 +136,7 @@
         return Result;
       };
       Self.Layout.progressOn();
-      Self.ReportsLoaded.then(DoLoadPDF).catch(ShowLoadingError);
+      Self.ReportsLoaded.then(DoLoadPDF);
     };
   });
   this.Statistics = null;

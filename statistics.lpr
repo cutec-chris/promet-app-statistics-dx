@@ -81,9 +81,11 @@ var
   aQuerry: string;
   aRegex: TJSRegexp;
   aCont: TStringDynArray;
-  HasControls: Boolean;
+  HasControls,
+  DontExecute: Boolean;
   aHeight, i: Integer;
 begin
+  DontExecute:=False;
   aQuerry := string(Data.Properties['QUERRY']);
   aRegex := TJSRegexp.New('@(.*?):(.*?)@');
   aCont := aRegex.exec(aQuerry);
@@ -96,7 +98,9 @@ begin
       inc(i);
       ContentForm.addItem(null,js.new(['type','input','name',aCont[i],'label',aCont[i],'value','*']));
       if Params.Values[aCont[i]]<>'' then
-        ContentForm.setItemValue(aCont[i],Params.Values[aCont[i]]);
+        ContentForm.setItemValue(aCont[i],Params.Values[aCont[i]])
+      else
+        DontExecute := True;
       ContentForm.setUserData(aCont[i],'statistics','y');
       HasControls:=True;
       inc(i,2);
@@ -107,7 +111,7 @@ begin
   else
     ContentForm.hideItem('lSettings');
   Layout.cells('a').setHeight(aHeight);
-  if not HasControls then
+  if not DontExecute then
     DoExecute;
 end;
 procedure TStatisticsForm.DoExecute;
@@ -117,35 +121,45 @@ procedure TStatisticsForm.DoExecute;
       aFrame: TJSWindow;
       aRequest: TJSXMLHttpRequest;
     begin
-      aFrame := Tabs.cells('content').getFrame;
-      aFrame.onerror:=@Avamm.WindowError;
-      aRequest := aValue;
-      Tabs.cells('content').show;
-      Tabs.cells('content').setActive;
-      Layout.progressOff;
-      asm
-        aFrame = aFrame.contentWindow;
-        var reader = new FileReader();
-        reader.addEventListener('loadend', function() {
-          var aPdf = aFrame.loadPdf({data:this.result});
-          aBlob = null;
-          reader = null;
-        });
-        aBlob = null;
-        var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
-        reader.readAsArrayBuffer(aBlob);
-      end;
+      if aValue.Status<>200 then
+        begin
+          Layout.progressOff;
+          dhtmlx.message(js.new(['type','error',
+                                 'text',aValue.responseText]));
+          Tabs.cells('content').hide;
+        end
+      else
+        begin
+          aFrame := Tabs.cells('content').getFrame;
+          Avamm.InitWindow(aFrame);
+          aRequest := aValue;
+          Tabs.cells('content').show;
+          Tabs.cells('content').setActive;
+          Layout.progressOff;
+          asm
+            aFrame = aFrame.contentWindow;
+            var reader = new FileReader();
+            reader.addEventListener('loadend', function() {
+              var aPdf = aFrame.loadPdf({data:this.result});
+              aBlob = null;
+              reader = null;
+            });
+            aBlob = null;
+            reader.addEventListener("onerror", function (error) {
+                  throw error;
+                }, false);
+            var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
+            reader.readAsArrayBuffer(aBlob);
+          end;
+        end;
     end;
   begin
     with Tabs.cells('content') do
-      attachURL('/appbase/pdfview.html');
+      begin
+        attachURL('/appbase/pdfview.html');
+        Avamm.InitWindow(getFrame);
+      end;
     Tabs.attachEvent('onContentLoaded',@PDFIsLoaded);
-  end;
-  function ShowLoadingError(aValue: JSValue): JSValue;
-  begin
-    Layout.progressOff;
-    dhtmlx.message(js.new(['type','error',
-                           'text',aValue]));
   end;
   function DoLoadPDF(aValue: TJSXMLHttpRequest): JSValue;
   var
@@ -172,8 +186,7 @@ procedure TStatisticsForm.DoExecute;
             aUrl := aUrl+'?exec=1';
             ContentForm.forEachItem(@AddParamToUrl);
             //Load PDF
-            LoadData(aUrl)._then(TJSPromiseResolver(@DoShowPDF))
-                          .catch(@ShowLoadingError);
+            LoadData(aUrl)._then(TJSPromiseResolver(@DoShowPDF));
             ReportLoaded := True;
           end;
       end;
@@ -187,8 +200,7 @@ procedure TStatisticsForm.DoExecute;
   end;
 begin
   Layout.progressOn;
-  ReportsLoaded._then(TJSPromiseresolver(@DoLoadPDF))
-               .catch(@ShowLoadingError);
+  ReportsLoaded._then(TJSPromiseresolver(@DoLoadPDF));
 end;
 
 initialization
