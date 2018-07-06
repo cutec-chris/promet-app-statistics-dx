@@ -7,6 +7,8 @@ type
   { TStatisticsForm }
 
   TStatisticsForm = class(TAvammForm)
+  private
+    ContentLoadedEvent: Integer;
   protected
     ContentForm : TDHTMLXForm;
     procedure DoLoadData; override;
@@ -151,6 +153,7 @@ procedure TStatisticsForm.DoExecute;
             var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
             reader.readAsArrayBuffer(aBlob);
           end;
+          Tabs.detachEvent(ContentLoadedEvent);
         end;
     end;
   begin
@@ -159,7 +162,7 @@ procedure TStatisticsForm.DoExecute;
         attachURL('/appbase/pdfview.html');
         Avamm.InitWindow(getFrame);
       end;
-    Tabs.attachEvent('onContentLoaded',@PDFIsLoaded);
+    ContentLoadedEvent := Tabs.attachEvent('onContentLoaded',@PDFIsLoaded);
   end;
   function DoLoadPDF(aValue: TJSXMLHttpRequest): JSValue;
   var
@@ -198,6 +201,8 @@ procedure TStatisticsForm.DoExecute;
                                'text',strNoReport]));
       end;
   end;
+var
+  aDiv: TJSWindow;
 begin
   Layout.progressOn;
   ReportsLoaded._then(TJSPromiseresolver(@DoLoadPDF));

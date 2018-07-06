@@ -4,6 +4,7 @@
   rtl.createClass($mod,"TStatisticsForm",pas.AvammForms.TAvammForm,function () {
     this.$init = function () {
       pas.AvammForms.TAvammForm.$init.call(this);
+      this.ContentLoadedEvent = 0;
       this.ContentForm = null;
     };
     this.$final = function () {
@@ -97,12 +98,13 @@
                 }, false);
             var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
             reader.readAsArrayBuffer(aBlob);
+            Self.Tabs.detachEvent(Self.ContentLoadedEvent);
           };
         };
         var $with1 = Self.Tabs.cells("content");
         $with1.attachURL("\/appbase\/pdfview.html");
         pas.Avamm.InitWindow($with1.getFrame());
-        Self.Tabs.attachEvent("onContentLoaded",PDFIsLoaded);
+        Self.ContentLoadedEvent = Self.Tabs.attachEvent("onContentLoaded",PDFIsLoaded);
         return Result;
       };
       function DoLoadPDF(aValue) {
@@ -124,7 +126,7 @@
             aUrl = (((("\/" + Self.FTablename) + "\/by-id\/") + ("" + Self.FID)) + "\/reports\/") + ("" + rtl.getObject(Self.Reports[i])["name"]);
             aUrl = aUrl + "?exec=1";
             Self.ContentForm.forEachItem(AddParamToUrl);
-            pas.Avamm.LoadData(aUrl,false,"text\/json",4000).then(DoShowPDF);
+            pas.Avamm.LoadData(aUrl,false,"text\/json",6000).then(DoShowPDF);
             ReportLoaded = true;
           };
         };
