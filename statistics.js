@@ -150,7 +150,7 @@
     var aParent = null;
     if ($mod.Statistics === null) {
       aParent = rtl.getObject(pas.Avamm.GetAvammContainer());
-      $mod.Statistics = pas.AvammForms.TAvammListForm.$create("Create$1",[aParent,"statistics"]);
+      $mod.Statistics = pas.AvammForms.TAvammListForm.$create("Create$1",[aParent,"statistics","1C"]);
       $mod.Statistics.Grid.setHeader("Name,Status",",",Array.of({}));
       $mod.Statistics.Grid.setColumnIds("NAME,STATUS");
       $mod.Statistics.Grid.setColTypes("ro,ro");
