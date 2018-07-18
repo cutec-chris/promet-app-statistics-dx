@@ -126,7 +126,7 @@
             aUrl = (((("\/" + Self.FTablename) + "\/by-id\/") + ("" + Self.FID)) + "\/reports\/") + ("" + rtl.getObject(Self.Reports[i])["name"]);
             aUrl = aUrl + "?exec=1";
             Self.ContentForm.forEachItem(AddParamToUrl);
-            pas.Avamm.LoadData(aUrl,false,"text\/json",6000).then(DoShowPDF);
+            pas.Avamm.LoadData(aUrl,false,"",15000).then(DoShowPDF);
             ReportLoaded = true;
           };
         };

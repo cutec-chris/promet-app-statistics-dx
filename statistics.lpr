@@ -189,7 +189,7 @@ procedure TStatisticsForm.DoExecute;
             aUrl := aUrl+'?exec=1';
             ContentForm.forEachItem(@AddParamToUrl);
             //Load PDF
-            LoadData(aUrl)._then(TJSPromiseResolver(@DoShowPDF));
+            LoadData(aUrl,False,'',15000)._then(TJSPromiseResolver(@DoShowPDF));
             ReportLoaded := True;
           end;
       end;
