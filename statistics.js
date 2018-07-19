@@ -154,7 +154,7 @@
       $mod.Statistics.Grid.setHeader("Name,Status");
       $mod.Statistics.Grid.setColumnIds("NAME,STATUS");
       $mod.Statistics.Grid.setColTypes("ro,ro");
-      $mod.Statistics.Grid.attachHeader("#text_filter,#text_filter");
+      $mod.Statistics.SetFilterHeader("#text_filter,#text_filter");
       $mod.Statistics.Grid.setInitWidths("*,100");
       $mod.Statistics.Grid.init();
     };
