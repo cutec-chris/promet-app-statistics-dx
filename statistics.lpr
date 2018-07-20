@@ -210,7 +210,7 @@ end;
 
 initialization
   if getRight('STATISTICS')>0 then
-    RegisterSidebarRoute(strReports,'statistics',@ShowStatistics);
+    RegisterSidebarRoute(strReports,'statistics',@ShowStatistics,'fa-file-text');
   Router.RegisterRoute('/statistics/by-id/:Id/:Params',@ShowStatistic);
 end.
 

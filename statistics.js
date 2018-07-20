@@ -162,7 +162,7 @@
   };
   $mod.$resourcestrings = {strReports: {org: "Berichte"}, strContent: {org: "Inhalt"}, strExecute: {org: "Ausführen"}, strNoReport: {org: "kein Bericht verfügbar !"}, strSettings: {org: "Einstellungen"}};
   $mod.$init = function () {
-    if (pas.Avamm.getRight("STATISTICS") > 0) pas.Avamm.RegisterSidebarRoute(rtl.getResStr(pas.statistics,"strReports"),"statistics",$mod.ShowStatistics);
+    if (pas.Avamm.getRight("STATISTICS") > 0) pas.Avamm.RegisterSidebarRoute(rtl.getResStr(pas.statistics,"strReports"),"statistics",$mod.ShowStatistics,"fa-file-text");
     pas.webrouter.Router().RegisterRoute("\/statistics\/by-id\/:Id\/:Params",$mod.ShowStatistic,false);
   };
 });
