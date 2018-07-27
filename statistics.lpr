@@ -86,6 +86,7 @@ var
   HasControls,
   DontExecute: Boolean;
   aHeight, i: Integer;
+  aDiv: TJSElement;
 begin
   DontExecute:=False;
   aQuerry := string(Data.Properties['QUERRY']);
@@ -112,7 +113,15 @@ begin
     ContentForm.showItem('lSettings')
   else
     ContentForm.hideItem('lSettings');
-  Layout.cells('a').setHeight(aHeight);
+  DoSetFormSize;
+  Tabs.cells('history').hide;
+  if Data.Properties['DESCRIPTION']<>nil then
+    begin
+      Tabs.addTab('description',strDescription,null,1,false,false);
+      aDiv := document.createElement('div');
+      Tabs.cells('description').appendObject(aDiv);
+      aDiv.innerHTML:=string(Data.Properties['DESCRIPTION']);
+    end;
   if not DontExecute then
     DoExecute;
 end;

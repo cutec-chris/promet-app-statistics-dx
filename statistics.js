@@ -42,6 +42,7 @@
       var DontExecute = false;
       var aHeight = 0;
       var i = 0;
+      var aDiv = null;
       DontExecute = false;
       aQuerry = "" + Self.FData["QUERRY"];
       aRegex = new RegExp("@(.*?):(.*?)@");
@@ -64,7 +65,14 @@
       if (HasControls) {
         Self.ContentForm.showItem("lSettings")}
        else Self.ContentForm.hideItem("lSettings");
-      Self.Layout.cells("a").setHeight(aHeight);
+      Self.DoSetFormSize();
+      Self.Tabs.cells("history").hide();
+      if (Self.FData["DESCRIPTION"] != null) {
+        Self.Tabs.addTab("description",rtl.getResStr(pas.AvammForms,"strDescription"),null,1,false,false);
+        aDiv = document.createElement("div");
+        Self.Tabs.cells("description").appendObject(aDiv);
+        aDiv.innerHTML = "" + Self.FData["DESCRIPTION"];
+      };
       if (!DontExecute) Self.DoExecute();
     };
     this.DoExecute = function () {
