@@ -15,6 +15,10 @@
       this.CreateForm();
       pas.AvammForms.TAvammForm.DoLoadData.apply(this,arguments);
       this.DoOpen();
+      this.Form.setFocusOnFirstActive();
+    };
+    this.DoEnterKeyPressed = function () {
+      this.DoExecute();
     };
     this.CreateForm = function () {
       var Self = this;

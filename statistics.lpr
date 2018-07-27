@@ -12,6 +12,7 @@ type
   protected
     ContentForm : TDHTMLXForm;
     procedure DoLoadData; override;
+    procedure DoEnterKeyPressed; override;
     procedure CreateForm;
     procedure DoOpen;
     procedure DoExecute;
@@ -55,7 +56,14 @@ begin
   CreateForm;
   inherited;
   DoOpen;
+  Form.setFocusOnFirstActive;
 end;
+
+procedure TStatisticsForm.DoEnterKeyPressed;
+begin
+  DoExecute;
+end;
+
 procedure TStatisticsForm.CreateForm;
   procedure ToolbarButtonClick(id : string);
   begin
