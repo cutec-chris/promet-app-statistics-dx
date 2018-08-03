@@ -1,6 +1,6 @@
 library statistics;
   uses js, web, classes, Avamm, webrouter, AvammForms, dhtmlx_base,
-    dhtmlx_form,SysUtils, Types;
+    dhtmlx_form,SysUtils, Types,dhtmlx_toolbar;
 
 type
 
@@ -9,6 +9,8 @@ type
   TStatisticsForm = class(TAvammForm)
   private
     ContentLoadedEvent: Integer;
+    ContToolbar : TDHTMLXToolbar;
+    FPdf : JSValue;
   protected
     ContentForm : TDHTMLXForm;
     procedure DoLoadData; override;
@@ -73,6 +75,24 @@ procedure TStatisticsForm.CreateForm;
       end
     ;
   end;
+  procedure ContToolBarClicked(id : string);
+  var
+    aPdf : JSValue;
+  begin
+    aPdf := FPdf;
+    if id = 'zoom+' then
+      begin
+        asm
+          aPdf.zoom+=1;
+
+        end;
+      end
+    else if id = 'zoom-' then
+      begin
+
+      end;
+  end;
+
 begin
   Tabs.addTab('content',strContent,100,0,true,false);
   Tabs.cells('content').hide;
@@ -80,6 +100,10 @@ begin
   Form.addItem(null,js.new(['type','label','label',strSettings,'hidden',true,'name','lSettings']));
   Toolbar.attachEvent('onClick', @ToolbarButtonClick);
   ContentForm := Form;
+  ContToolbar := TDHTMLXToolbar(Tabs.cells('content').attachToolbar(new(['iconset','awesome'])));
+  ContToolbar.addButton('zoom+',null,'','fa fa-search-plus','fa fa-search-plus');
+  ContToolbar.addButton('zoom-',null,'','fa fa-search-minus','fa fa-search-minus');
+  ContToolbar.attachEvent('onClick',@ContToolBarClicked);
 end;
 procedure TStatisticsForm.DoOpen;
   procedure CheckRemoveItem(aName : string);
@@ -139,6 +163,7 @@ procedure TStatisticsForm.DoExecute;
     var
       aFrame: TJSWindow;
       aRequest: TJSXMLHttpRequest;
+      aPdf : JSValue;
     begin
       if aValue.Status<>200 then
         begin
@@ -159,7 +184,7 @@ procedure TStatisticsForm.DoExecute;
             aFrame = aFrame.contentWindow;
             var reader = new FileReader();
             reader.addEventListener('loadend', function() {
-              var aPdf = aFrame.loadPdf({data:this.result});
+              aPdf = aFrame.loadPdf({data:this.result});
               aBlob = null;
               reader = null;
             });
@@ -170,6 +195,7 @@ procedure TStatisticsForm.DoExecute;
             var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
             reader.readAsArrayBuffer(aBlob);
           end;
+          FPdf:=aPdf;
           Tabs.detachEvent(ContentLoadedEvent);
         end;
     end;

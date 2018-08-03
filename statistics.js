@@ -1,13 +1,16 @@
-﻿rtl.module("statistics",["System","JS","Web","Classes","Avamm","webrouter","AvammForms","dhtmlx_base","dhtmlx_form","SysUtils","Types"],function () {
+﻿rtl.module("statistics",["System","JS","Web","Classes","Avamm","webrouter","AvammForms","dhtmlx_base","dhtmlx_form","SysUtils","Types","dhtmlx_toolbar"],function () {
   "use strict";
   var $mod = this;
   rtl.createClass($mod,"TStatisticsForm",pas.AvammForms.TAvammForm,function () {
     this.$init = function () {
       pas.AvammForms.TAvammForm.$init.call(this);
       this.ContentLoadedEvent = 0;
+      this.ContToolbar = null;
+      this.FPdf = undefined;
       this.ContentForm = null;
     };
     this.$final = function () {
+      this.ContToolbar = undefined;
       this.ContentForm = undefined;
       pas.AvammForms.TAvammForm.$final.call(this);
     };
@@ -27,12 +30,23 @@
           Self.DoExecute();
         };
       };
+      function ContToolBarClicked(id) {
+        var aPdf = undefined;
+        aPdf = Self.FPdf;
+        if (id === "zoom+") {
+          aPdf.zoom+=1;
+        } else if (id === "zoom-") ;
+      };
       Self.Tabs.addTab("content",rtl.getResStr(pas.statistics,"strContent"),100,0,true,false);
       Self.Tabs.cells("content").hide();
       Self.Toolbar.addButton("execute",0,rtl.getResStr(pas.statistics,"strExecute"),"fa fa-pie-chart","fa fa-pie-chart");
       Self.Form.addItem(null,pas.JS.New(["type","label","label",rtl.getResStr(pas.statistics,"strSettings"),"hidden",true,"name","lSettings"]));
       Self.Toolbar.attachEvent("onClick",ToolbarButtonClick);
       Self.ContentForm = Self.Form;
+      Self.ContToolbar = rtl.getObject(Self.Tabs.cells("content").attachToolbar(pas.JS.New(["iconset","awesome"])));
+      Self.ContToolbar.addButton("zoom+",null,"","fa fa-search-plus","fa fa-search-plus");
+      Self.ContToolbar.addButton("zoom-",null,"","fa fa-search-minus","fa fa-search-minus");
+      Self.ContToolbar.attachEvent("onClick",ContToolBarClicked);
     };
     this.DoOpen = function () {
       var Self = this;
@@ -86,6 +100,7 @@
         function PDFIsLoaded() {
           var aFrame = null;
           var aRequest = null;
+          var aPdf = undefined;
           if (aValue.status !== 200) {
             Self.Layout.progressOff();
             dhtmlx.message(pas.JS.New(["type","error","text",aValue.responseText]));
@@ -100,7 +115,7 @@
             aFrame = aFrame.contentWindow;
             var reader = new FileReader();
             reader.addEventListener('loadend', function() {
-              var aPdf = aFrame.loadPdf({data:this.result});
+              aPdf = aFrame.loadPdf({data:this.result});
               aBlob = null;
               reader = null;
             });
@@ -110,6 +125,7 @@
                 }, false);
             var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
             reader.readAsArrayBuffer(aBlob);
+            Self.FPdf = aPdf;
             Self.Tabs.detachEvent(Self.ContentLoadedEvent);
           };
         };
