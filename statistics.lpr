@@ -11,6 +11,7 @@ type
     ContentLoadedEvent: Integer;
     ContToolbar : TDHTMLXToolbar;
     FPdf : JSValue;
+    aFrame: TJSWindow;
   protected
     ContentForm : TDHTMLXForm;
     procedure DoLoadData; override;
@@ -52,6 +53,7 @@ begin
     end;
   Statistics.Show;
 end;
+
 { TStatisticsForm }
 procedure TStatisticsForm.DoLoadData;
 begin
@@ -83,13 +85,20 @@ procedure TStatisticsForm.CreateForm;
     if id = 'zoom+' then
       begin
         asm
-          aPdf.zoom+=1;
-
+          aPdf.scale+=0.1;
+          Self.aFrame.document.body.innerHTML = "";
+          Self.aFrame.currPage = 1;
+          Self.aFrame.renderPdf(aPdf);
         end;
       end
     else if id = 'zoom-' then
       begin
-
+        asm
+          aPdf.scale-=0.1;
+          Self.aFrame.document.body.innerHTML = "";
+          Self.aFrame.currPage = 1;
+          Self.aFrame.renderPdf(aPdf);
+        end;
       end;
   end;
 
@@ -103,6 +112,8 @@ begin
   ContToolbar := TDHTMLXToolbar(Tabs.cells('content').attachToolbar(new(['iconset','awesome'])));
   ContToolbar.addButton('zoom+',null,'','fa fa-search-plus','fa fa-search-plus');
   ContToolbar.addButton('zoom-',null,'','fa fa-search-minus','fa fa-search-minus');
+  ContToolbar.disableItem('zoom+');
+  ContToolbar.disableItem('zoom-');
   ContToolbar.attachEvent('onClick',@ContToolBarClicked);
 end;
 procedure TStatisticsForm.DoOpen;
@@ -161,9 +172,18 @@ procedure TStatisticsForm.DoExecute;
   function DoShowPDF(aValue: TJSXMLHttpRequest): JSValue;
     procedure PDFIsLoaded;
     var
-      aFrame: TJSWindow;
       aRequest: TJSXMLHttpRequest;
-      aPdf : JSValue;
+      aPdf : TJSPromise;
+      function SetPDF(aValue: JSValue): JSValue;
+      begin
+        FPdf := aValue;
+        ContToolbar.enableItem('zoom+');
+        ContToolbar.enableItem('zoom-');
+      end;
+      procedure SetPDFo;
+      begin
+        aPdf._then(@SetPDF);
+      end;
     begin
       if aValue.Status<>200 then
         begin
@@ -181,10 +201,10 @@ procedure TStatisticsForm.DoExecute;
           Tabs.cells('content').setActive;
           Layout.progressOff;
           asm
-            aFrame = aFrame.contentWindow;
+            Self.aFrame = Self.aFrame.contentWindow;
             var reader = new FileReader();
             reader.addEventListener('loadend', function() {
-              aPdf = aFrame.loadPdf({data:this.result});
+              aPdf = Self.aFrame.loadPdf({data:this.result}).promise;
               aBlob = null;
               reader = null;
             });
@@ -195,7 +215,7 @@ procedure TStatisticsForm.DoExecute;
             var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
             reader.readAsArrayBuffer(aBlob);
           end;
-          FPdf:=aPdf;
+          window.setTimeout(@SetPDFo,100);
           Tabs.detachEvent(ContentLoadedEvent);
         end;
     end;

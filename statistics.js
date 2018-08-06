@@ -7,10 +7,12 @@
       this.ContentLoadedEvent = 0;
       this.ContToolbar = null;
       this.FPdf = undefined;
+      this.aFrame = null;
       this.ContentForm = null;
     };
     this.$final = function () {
       this.ContToolbar = undefined;
+      this.aFrame = undefined;
       this.ContentForm = undefined;
       pas.AvammForms.TAvammForm.$final.call(this);
     };
@@ -34,8 +36,16 @@
         var aPdf = undefined;
         aPdf = Self.FPdf;
         if (id === "zoom+") {
-          aPdf.zoom+=1;
-        } else if (id === "zoom-") ;
+          aPdf.scale+=0.1;
+          Self.aFrame.document.body.innerHTML = "";
+          Self.aFrame.currPage = 1;
+          Self.aFrame.renderPdf(aPdf);
+        } else if (id === "zoom-") {
+          aPdf.scale-=0.1;
+          Self.aFrame.document.body.innerHTML = "";
+          Self.aFrame.currPage = 1;
+          Self.aFrame.renderPdf(aPdf);
+        };
       };
       Self.Tabs.addTab("content",rtl.getResStr(pas.statistics,"strContent"),100,0,true,false);
       Self.Tabs.cells("content").hide();
@@ -46,6 +56,8 @@
       Self.ContToolbar = rtl.getObject(Self.Tabs.cells("content").attachToolbar(pas.JS.New(["iconset","awesome"])));
       Self.ContToolbar.addButton("zoom+",null,"","fa fa-search-plus","fa fa-search-plus");
       Self.ContToolbar.addButton("zoom-",null,"","fa fa-search-minus","fa fa-search-minus");
+      Self.ContToolbar.disableItem("zoom+");
+      Self.ContToolbar.disableItem("zoom-");
       Self.ContToolbar.attachEvent("onClick",ContToolBarClicked);
     };
     this.DoOpen = function () {
@@ -98,24 +110,33 @@
       function DoShowPDF(aValue) {
         var Result = undefined;
         function PDFIsLoaded() {
-          var aFrame = null;
           var aRequest = null;
-          var aPdf = undefined;
+          var aPdf = null;
+          function SetPDF(aValue) {
+            var Result = undefined;
+            Self.FPdf = aValue;
+            Self.ContToolbar.enableItem("zoom+");
+            Self.ContToolbar.enableItem("zoom-");
+            return Result;
+          };
+          function SetPDFo() {
+            aPdf.then(SetPDF);
+          };
           if (aValue.status !== 200) {
             Self.Layout.progressOff();
             dhtmlx.message(pas.JS.New(["type","error","text",aValue.responseText]));
             Self.Tabs.cells("content").hide();
           } else {
-            aFrame = Self.Tabs.cells("content").getFrame();
-            pas.Avamm.InitWindow(aFrame);
+            Self.aFrame = Self.Tabs.cells("content").getFrame();
+            pas.Avamm.InitWindow(Self.aFrame);
             aRequest = aValue;
             Self.Tabs.cells("content").show();
             Self.Tabs.cells("content").setActive();
             Self.Layout.progressOff();
-            aFrame = aFrame.contentWindow;
+            Self.aFrame = Self.aFrame.contentWindow;
             var reader = new FileReader();
             reader.addEventListener('loadend', function() {
-              aPdf = aFrame.loadPdf({data:this.result});
+              aPdf = Self.aFrame.loadPdf({data:this.result}).promise;
               aBlob = null;
               reader = null;
             });
@@ -125,7 +146,7 @@
                 }, false);
             var aBlob = new Blob([aRequest.response], {type: "application/octet-stream"})
             reader.readAsArrayBuffer(aBlob);
-            Self.FPdf = aPdf;
+            window.setTimeout(SetPDFo,100);
             Self.Tabs.detachEvent(Self.ContentLoadedEvent);
           };
         };
