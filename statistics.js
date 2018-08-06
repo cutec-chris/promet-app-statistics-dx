@@ -36,12 +36,12 @@
         var aPdf = undefined;
         aPdf = Self.FPdf;
         if (id === "zoom+") {
-          aPdf.scale+=0.1;
+          Self.aFrame.scale+=0.1;
           Self.aFrame.document.body.innerHTML = "";
           Self.aFrame.currPage = 1;
           Self.aFrame.renderPdf(aPdf);
         } else if (id === "zoom-") {
-          aPdf.scale-=0.1;
+          Self.aFrame.scale-=0.1;
           Self.aFrame.document.body.innerHTML = "";
           Self.aFrame.currPage = 1;
           Self.aFrame.renderPdf(aPdf);

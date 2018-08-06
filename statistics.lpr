@@ -85,7 +85,7 @@ procedure TStatisticsForm.CreateForm;
     if id = 'zoom+' then
       begin
         asm
-          aPdf.scale+=0.1;
+          Self.aFrame.scale+=0.1;
           Self.aFrame.document.body.innerHTML = "";
           Self.aFrame.currPage = 1;
           Self.aFrame.renderPdf(aPdf);
@@ -94,7 +94,7 @@ procedure TStatisticsForm.CreateForm;
     else if id = 'zoom-' then
       begin
         asm
-          aPdf.scale-=0.1;
+          Self.aFrame.scale-=0.1;
           Self.aFrame.document.body.innerHTML = "";
           Self.aFrame.currPage = 1;
           Self.aFrame.renderPdf(aPdf);
