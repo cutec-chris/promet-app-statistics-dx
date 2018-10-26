@@ -105,6 +105,9 @@ procedure TStatisticsForm.CreateForm;
 begin
   Tabs.addTab('content',strContent,100,0,true,false);
   Tabs.cells('content').hide;
+  Form.hideItem('eShorttext');
+  Form.hideItem('lCommon');
+  TJSHTMLElement(Tabs.cont.children.item(0).childNodes.item(0)).style.setProperty('height','0px');
   Toolbar.addButton('execute',0,strExecute,'fa fa-pie-chart','fa fa-pie-chart');
   Form.addItem(null,js.new(['type','label','label',strSettings,'hidden',true,'name','lSettings']));
   Toolbar.attachEvent('onClick', @ToolbarButtonClick);

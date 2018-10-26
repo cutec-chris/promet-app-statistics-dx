@@ -49,6 +49,9 @@
       };
       Self.Tabs.addTab("content",rtl.getResStr(pas.statistics,"strContent"),100,0,true,false);
       Self.Tabs.cells("content").hide();
+      Self.Form.hideItem("eShorttext");
+      Self.Form.hideItem("lCommon");
+      Self.Tabs.cont.children.item(0).childNodes.item(0).style.setProperty("height","0px");
       Self.Toolbar.addButton("execute",0,rtl.getResStr(pas.statistics,"strExecute"),"fa fa-pie-chart","fa fa-pie-chart");
       Self.Form.addItem(null,pas.JS.New(["type","label","label",rtl.getResStr(pas.statistics,"strSettings"),"hidden",true,"name","lSettings"]));
       Self.Toolbar.attachEvent("onClick",ToolbarButtonClick);
