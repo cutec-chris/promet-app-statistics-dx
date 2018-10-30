@@ -180,6 +180,7 @@
             Self.ContentForm.forEachItem(AddParamToUrl);
             pas.Avamm.LoadData(aUrl,false,"",15000).then(DoShowPDF);
             ReportLoaded = true;
+            return Result;
           };
         };
         if (!ReportLoaded) {

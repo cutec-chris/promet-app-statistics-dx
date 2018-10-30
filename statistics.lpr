@@ -257,6 +257,7 @@ procedure TStatisticsForm.DoExecute;
             //Load PDF
             LoadData(aUrl,False,'',15000)._then(TJSPromiseResolver(@DoShowPDF));
             ReportLoaded := True;
+            exit;
           end;
       end;
     if not ReportLoaded then
