@@ -17,7 +17,7 @@ type
     procedure DoLoadData; override;
     procedure DoEnterKeyPressed; override;
     procedure CreateForm;
-    procedure DoFormChange(Id : JSValue); override;
+    procedure DoFormChange(Id,value : JSValue); override;
     procedure DoOpen;
     procedure DoExecute;
   end;
@@ -121,10 +121,10 @@ begin
   ContToolbar.attachEvent('onClick',@ContToolBarClicked);
 end;
 
-procedure TStatisticsForm.DoFormChange(Id: JSValue);
+procedure TStatisticsForm.DoFormChange(Id,value: JSValue);
 begin
   if ContentForm.getUserData(string(Id),'statistics','n') <> 'y' then
-    inherited DoFormChange(Id);
+    inherited DoFormChange(Id,value);
 end;
 
 procedure TStatisticsForm.DoOpen;

@@ -63,8 +63,8 @@
       Self.ContToolbar.disableItem("zoom-");
       Self.ContToolbar.attachEvent("onClick",ContToolBarClicked);
     };
-    this.DoFormChange = function (Id) {
-      if (this.ContentForm.getUserData("" + Id,"statistics","n") != "y") pas.AvammForms.TAvammForm.DoFormChange.call(this,Id);
+    this.DoFormChange = function (Id, value) {
+      if (this.ContentForm.getUserData("" + Id,"statistics","n") != "y") pas.AvammForms.TAvammForm.DoFormChange.call(this,Id,value);
     };
     this.DoOpen = function () {
       var Self = this;
