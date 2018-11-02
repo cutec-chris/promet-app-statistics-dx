@@ -32,21 +32,6 @@
           Self.DoExecute();
         };
       };
-      function ContToolBarClicked(id) {
-        var aPdf = undefined;
-        aPdf = Self.FPdf;
-        if (id === "zoom+") {
-          Self.aFrame.scale+=0.1;
-          Self.aFrame.document.body.innerHTML = "";
-          Self.aFrame.currPage = 1;
-          Self.aFrame.renderPdf(aPdf);
-        } else if (id === "zoom-") {
-          Self.aFrame.scale-=0.1;
-          Self.aFrame.document.body.innerHTML = "";
-          Self.aFrame.currPage = 1;
-          Self.aFrame.renderPdf(aPdf);
-        };
-      };
       Self.Tabs.addTab("content",rtl.getResStr(pas.statistics,"strContent"),100,0,true,false);
       Self.Tabs.cells("content").hide();
       Self.Form.hideItem("eShorttext");
@@ -61,10 +46,25 @@
       Self.ContToolbar.addButton("zoom-",null,"","fa fa-search-minus","fa fa-search-minus");
       Self.ContToolbar.disableItem("zoom+");
       Self.ContToolbar.disableItem("zoom-");
-      Self.ContToolbar.attachEvent("onClick",ContToolBarClicked);
+      Self.ContToolbar.attachEvent("onClick",rtl.createCallback(Self,"ContToolBarClicked"));
     };
     this.DoFormChange = function (Id, value) {
       if (this.ContentForm.getUserData("" + Id,"statistics","n") != "y") pas.AvammForms.TAvammForm.DoFormChange.call(this,Id,value);
+    };
+    this.ContToolBarClicked = function (id) {
+      var aPdf = undefined;
+      aPdf = this.FPdf;
+      if (id === "zoom+") {
+        this.aFrame.scale+=0.1;
+        this.aFrame.contdiv.innerHTML = "";
+        this.aFrame.currPage = 1;
+        this.aFrame.renderPdf(aPdf);
+      } else if (id === "zoom-") {
+        this.aFrame.scale-=0.1;
+        this.aFrame.contdiv.innerHTML = "";
+        this.aFrame.currPage = 1;
+        this.aFrame.renderPdf(aPdf);
+      };
     };
     this.DoOpen = function () {
       var Self = this;
@@ -120,9 +120,36 @@
           var aPdf = null;
           function SetPDF(aValue) {
             var Result = undefined;
+            var elm = null;
+            function DoScroll(event) {
+              var Result = false;
+              var delta = 0;
+              var strg = false;
+              try {
+                //if (event.type == "wheel") supportsWheel = true;
+                delta = ((event.deltaY || -event.wheelDelta || event.detail) >> 10) || 1;
+                strg = event.ctrlKey;
+                if (!strg) return Result;
+                if (delta > 0) {
+                  Self.ContToolBarClicked("zoom-")}
+                 else Self.ContToolBarClicked("zoom+");
+                event.preventDefault();
+              } catch ($e) {
+              };
+              Result = false;
+              return Result;
+            };
             Self.FPdf = aValue;
             Self.ContToolbar.enableItem("zoom+");
             Self.ContToolbar.enableItem("zoom-");
+            try {
+              elm = Self.aFrame.contdiv;
+              elm.addEventListener("DOMMouseScroll",DoScroll);
+              elm.addEventListener("wheel",DoScroll);
+              elm.addEventListener("mousewheel",DoScroll);
+              elm.addEventListener("scroll",DoScroll);
+            } catch ($e) {
+            };
             return Result;
           };
           function SetPDFo() {

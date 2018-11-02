@@ -18,6 +18,7 @@ type
     procedure DoEnterKeyPressed; override;
     procedure CreateForm;
     procedure DoFormChange(Id,value : JSValue); override;
+    procedure ContToolBarClicked(id : string);
     procedure DoOpen;
     procedure DoExecute;
   end;
@@ -78,31 +79,6 @@ procedure TStatisticsForm.CreateForm;
       end
     ;
   end;
-  procedure ContToolBarClicked(id : string);
-  var
-    aPdf : JSValue;
-  begin
-    aPdf := FPdf;
-    if id = 'zoom+' then
-      begin
-        asm
-          Self.aFrame.scale+=0.1;
-          Self.aFrame.document.body.innerHTML = "";
-          Self.aFrame.currPage = 1;
-          Self.aFrame.renderPdf(aPdf);
-        end;
-      end
-    else if id = 'zoom-' then
-      begin
-        asm
-          Self.aFrame.scale-=0.1;
-          Self.aFrame.document.body.innerHTML = "";
-          Self.aFrame.currPage = 1;
-          Self.aFrame.renderPdf(aPdf);
-        end;
-      end;
-  end;
-
 begin
   Tabs.addTab('content',strContent,100,0,true,false);
   Tabs.cells('content').hide;
@@ -125,6 +101,31 @@ procedure TStatisticsForm.DoFormChange(Id,value: JSValue);
 begin
   if ContentForm.getUserData(string(Id),'statistics','n') <> 'y' then
     inherited DoFormChange(Id,value);
+end;
+
+procedure TStatisticsForm.ContToolBarClicked(id: string);
+var
+  aPdf : JSValue;
+begin
+  aPdf := FPdf;
+  if id = 'zoom+' then
+    begin
+      asm
+        this.aFrame.scale+=0.1;
+        this.aFrame.contdiv.innerHTML = "";
+        this.aFrame.currPage = 1;
+        this.aFrame.renderPdf(aPdf);
+      end;
+    end
+  else if id = 'zoom-' then
+    begin
+      asm
+        this.aFrame.scale-=0.1;
+        this.aFrame.contdiv.innerHTML = "";
+        this.aFrame.currPage = 1;
+        this.aFrame.renderPdf(aPdf);
+      end;
+    end;
 end;
 
 procedure TStatisticsForm.DoOpen;
@@ -186,10 +187,49 @@ procedure TStatisticsForm.DoExecute;
       aRequest: TJSXMLHttpRequest;
       aPdf : TJSPromise;
       function SetPDF(aValue: JSValue): JSValue;
+      var
+        elm: TJSElement;
+        function DoScroll(event : JSValue) : Boolean;
+        var
+          supportsWheel : Boolean;
+          delta : Integer;
+          strg : Boolean;
+        begin
+          try
+            asm
+              //if (event.type == "wheel") supportsWheel = true;
+              delta = ((event.deltaY || -event.wheelDelta || event.detail) >> 10) || 1;
+              strg = event.ctrlKey;
+            end;
+            if not strg then exit;
+            if delta >0 then
+              ContToolBarClicked('zoom-')
+            else
+              ContToolBarClicked('zoom+');
+            //event.detail is positive for a downward scroll, negative for an upward scroll
+            //scale = scale + (event.detail*0.05);
+            asm
+              event.preventDefault();
+            end;
+          except
+          end;
+          result := False;
+        end;
+
       begin
         FPdf := aValue;
         ContToolbar.enableItem('zoom+');
         ContToolbar.enableItem('zoom-');
+        try
+          asm
+            elm = Self.aFrame.contdiv;
+          end;
+          elm.addEventListener('DOMMouseScroll',@DoScroll);
+          elm.addEventListener('wheel',@DoScroll);
+          elm.addEventListener('mousewheel',@DoScroll);
+          elm.addEventListener('scroll',@DoScroll);
+        except
+        end;
       end;
       procedure SetPDFo;
       begin
