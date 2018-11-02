@@ -17,6 +17,7 @@ type
     procedure DoLoadData; override;
     procedure DoEnterKeyPressed; override;
     procedure CreateForm;
+    procedure DoFormChange(Id : JSValue); override;
     procedure DoOpen;
     procedure DoExecute;
   end;
@@ -119,6 +120,13 @@ begin
   ContToolbar.disableItem('zoom-');
   ContToolbar.attachEvent('onClick',@ContToolBarClicked);
 end;
+
+procedure TStatisticsForm.DoFormChange(Id: JSValue);
+begin
+  if ContentForm.getUserData(string(Id),'statistics','n') <> 'y' then
+    inherited DoFormChange(Id);
+end;
+
 procedure TStatisticsForm.DoOpen;
   procedure CheckRemoveItem(aName : string);
   begin
