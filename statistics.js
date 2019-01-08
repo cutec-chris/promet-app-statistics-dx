@@ -1,4 +1,4 @@
-﻿rtl.module("statistics",["System","JS","Web","Classes","Avamm","webrouter","AvammForms","dhtmlx_base","dhtmlx_form","SysUtils","Types","dhtmlx_toolbar"],function () {
+﻿rtl.module("statistics",["System","JS","Web","Classes","Avamm","webrouter","AvammForms","dhtmlx_base","dhtmlx_form","SysUtils","Types","dhtmlx_toolbar","dhtmlx_grid"],function () {
   "use strict";
   var $mod = this;
   rtl.createClass($mod,"TStatisticsForm",pas.AvammForms.TAvammForm,function () {
@@ -8,11 +8,13 @@
       this.ContToolbar = null;
       this.FPdf = undefined;
       this.aFrame = null;
+      this.Grid = null;
       this.ContentForm = null;
     };
     this.$final = function () {
       this.ContToolbar = undefined;
       this.aFrame = undefined;
+      this.Grid = undefined;
       this.ContentForm = undefined;
       pas.AvammForms.TAvammForm.$final.call(this);
     };
@@ -50,6 +52,9 @@
       Self.ContToolbar.disableItem("zoom+");
       Self.ContToolbar.disableItem("zoom-");
       Self.ContToolbar.attachEvent("onClick",rtl.createCallback(Self,"ContToolBarClicked"));
+      Self.Tabs.addTab("data",rtl.getResStr(pas.statistics,"strContent"),100,0,true,false);
+      Self.Tabs.cells("data").hide();
+      Self.Grid = rtl.getObject(Self.Tabs.cells("data").attachGrid(pas.JS.New([])));
     };
     this.DoFormChange = function (Id, value) {
       if (this.ContentForm.getUserData("" + Id,"statistics","n") != "y") pas.AvammForms.TAvammForm.DoFormChange.call(this,Id,value);
@@ -161,6 +166,7 @@
           if (aValue.status !== 200) {
             Self.Layout.progressOff();
             dhtmlx.message(pas.JS.New(["type","error","text",aValue.responseText]));
+            Self.ShowData();
             Self.Tabs.cells("content").hide();
           } else {
             Self.aFrame = Self.Tabs.cells("content").getFrame();
@@ -219,6 +225,7 @@
         if (!ReportLoaded) {
           Self.Layout.progressOff();
           Self.Tabs.cells("content").hide();
+          Self.ShowData();
           dhtmlx.message(pas.JS.New(["type","warning","text",rtl.getResStr(pas.statistics,"strNoReport")]));
         };
         return Result;
@@ -230,7 +237,41 @@
       var Self = this;
       function DoShowData(aValue) {
         var Result = undefined;
+        var aJson = null;
+        var aProps = [];
+        var tmp = "";
+        var i = 0;
+        var a = 0;
+        var aId = undefined;
+        var aArr2 = null;
+        Self.Grid.clearAll(true);
+        aJson = rtl.getObject(JSON.parse(aValue.responseText));
         Self.Layout.progressOff();
+        if (aJson.length === 0) return Result;
+        aProps = Object.getOwnPropertyNames(rtl.getObject(aJson[0]));
+        for (var $l1 = 1, $end2 = rtl.length(aProps) - 1; $l1 <= $end2; $l1++) {
+          i = $l1;
+          if (i > 1) {
+            tmp = (tmp + ",") + aProps[i]}
+           else tmp = aProps[i];
+        };
+        Self.Grid.setHeader(tmp);
+        Self.Grid.setColumnIds(tmp);
+        Self.Grid.init();
+        for (var $l3 = 0, $end4 = aJson.length - 1; $l3 <= $end4; $l3++) {
+          i = $l3;
+          aId = (new Date()).valueOf();
+          aArr2 = new Array();
+          aProps = Object.getOwnPropertyNames(rtl.getObject(aJson[i]));
+          for (var $l5 = 1, $end6 = rtl.length(aProps) - 1; $l5 <= $end6; $l5++) {
+            a = $l5;
+            aArr2.push(rtl.getObject(aJson[i])[aProps[a]]);
+          };
+          Self.Grid.addRow(aId,aArr2);
+        };
+        Self.Tabs.cells("content").hide();
+        Self.Tabs.cells("data").show();
+        Self.Tabs.cells("data").setActive();
         return Result;
       };
       function DoLoadIData(aValue) {

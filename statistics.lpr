@@ -1,6 +1,6 @@
 library statistics;
   uses js, web, classes, Avamm, webrouter, AvammForms, dhtmlx_base,
-    dhtmlx_form,SysUtils, Types,dhtmlx_toolbar;
+    dhtmlx_form,SysUtils, Types,dhtmlx_toolbar,dhtmlx_grid;
 
 type
 
@@ -12,6 +12,7 @@ type
     ContToolbar : TDHTMLXToolbar;
     FPdf : JSValue;
     aFrame: TJSWindow;
+    Grid : TDHTMLXGrid;
   protected
     ContentForm : TDHTMLXForm;
     procedure DoLoadData; override;
@@ -102,6 +103,9 @@ begin
   ContToolbar.disableItem('zoom+');
   ContToolbar.disableItem('zoom-');
   ContToolbar.attachEvent('onClick',@ContToolBarClicked);
+  Tabs.addTab('data',strContent,100,0,true,false);
+  Tabs.cells('data').hide;
+  Grid := TDHTMLXGrid(Tabs.cells('data').attachGrid(new([])));
 end;
 
 procedure TStatisticsForm.DoFormChange(Id,value: JSValue);
@@ -248,6 +252,7 @@ procedure TStatisticsForm.DoExecute;
           Layout.progressOff;
           dhtmlx.message(js.new(['type','error',
                                  'text',aValue.responseText]));
+          ShowData;
           Tabs.cells('content').hide;
         end
       else
@@ -319,6 +324,7 @@ procedure TStatisticsForm.DoExecute;
       begin
         Layout.progressOff;
         Tabs.cells('content').hide;
+        ShowData;
         dhtmlx.message(js.new(['type','warning',
                                'text',strNoReport]));
       end;
@@ -332,8 +338,45 @@ end;
 
 procedure TStatisticsForm.ShowData;
 function DoShowData(aValue: TJSXMLHttpRequest): JSValue;
+var
+  aJson: TJSArray;
+  aProps: TStringDynArray;
+  tmp : string;
+  i, a: Integer;
+  aId : JSValue;
+  aArr2 : TJSArray;
 begin
+  Grid.clearAll(true);
+  aJson := TJSArray(TJSJSON.parse(aValue.responseText));
   Layout.progressOff;
+  if aJson.Length=0 then exit;
+  aProps := TJSObject.getOwnPropertyNames(TJSObject(aJson.Elements[0]));
+  for i := 1 to length(aProps)-1 do
+    begin
+      if i>1 then
+        tmp := tmp+','+aProps[i]
+      else
+        tmp := aProps[i];
+    end;
+  Grid.setHeader(tmp);
+  Grid.setColumnIds(tmp);
+  Grid.init;
+  for i := 0 to aJson.Length-1 do
+    begin
+      asm
+        aId = (new Date()).valueOf();
+      end;
+      aArr2 := TJSArray.new;
+      aProps := TJSObject.getOwnPropertyNames(TJSObject(aJson.Elements[i]));
+      for a := 1 to length(aProps)-1 do
+        begin
+          aArr2.push(TJSObject(aJson.Elements[i]).Properties[aProps[a]]);
+        end;
+      Grid.addRow(aId,aArr2);
+    end;
+  Tabs.cells('content').hide;
+  Tabs.cells('data').show;
+  Tabs.cells('data').setActive;
 end;
 
 function DoLoadIData(aValue: TJSXMLHttpRequest): JSValue;
