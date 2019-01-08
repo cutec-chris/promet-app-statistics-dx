@@ -30,6 +30,8 @@
       function ToolbarButtonClick(id) {
         if (id === "execute") {
           Self.DoExecute();
+        } else if (id === "rawdata") {
+          Self.ShowData();
         };
       };
       Self.Tabs.addTab("content",rtl.getResStr(pas.statistics,"strContent"),100,0,true,false);
@@ -38,6 +40,7 @@
       Self.Form.hideItem("lCommon");
       Self.Tabs.cont.children.item(0).childNodes.item(0).style.setProperty("height","0px");
       Self.Toolbar.addButton("execute",0,rtl.getResStr(pas.statistics,"strExecute"),"fa fa-pie-chart","fa fa-pie-chart");
+      Self.Toolbar.addButton("rawdata",8,rtl.getResStr(pas.statistics,"strRawData"),"fa fa-table","fa fa-table");
       Self.Form.addItem(null,pas.JS.New(["type","label","label",rtl.getResStr(pas.statistics,"strSettings"),"hidden",true,"name","lSettings"]));
       Self.Toolbar.attachEvent("onClick",ToolbarButtonClick);
       Self.ContentForm = Self.Form;
@@ -223,6 +226,29 @@
       Self.Layout.progressOn();
       Self.ReportsLoaded.then(DoLoadPDF);
     };
+    this.ShowData = function () {
+      var Self = this;
+      function DoShowData(aValue) {
+        var Result = undefined;
+        Self.Layout.progressOff();
+        return Result;
+      };
+      function DoLoadIData(aValue) {
+        var Result = undefined;
+        var aUrl = "";
+        function AddParamToUrl(aParam) {
+          if (Self.ContentForm.getUserData(aParam,"statistics","n") == "y") aUrl = (((aUrl + "&") + aParam) + "=") + ("" + Self.ContentForm.getItemValue(aParam));
+        };
+        aUrl = ((("\/" + Self.FTablename) + "\/by-id\/") + ("" + Self.FID)) + "\/rawdata.json";
+        aUrl = aUrl + "?exec=1";
+        Self.ContentForm.forEachItem(AddParamToUrl);
+        pas.Avamm.LoadData(aUrl,false,"",15000).then(DoShowData);
+        return Result;
+        return Result;
+      };
+      Self.Layout.progressOn();
+      Self.ReportsLoaded.then(DoLoadIData);
+    };
   });
   this.Statistics = null;
   this.ShowStatistic = function (URl, aRoute, Params) {
@@ -243,7 +269,7 @@
     };
     $mod.Statistics.Show();
   };
-  $mod.$resourcestrings = {strReports: {org: "Berichte"}, strContent: {org: "Inhalt"}, strExecute: {org: "Ausführen"}, strNoReport: {org: "kein Bericht verfügbar !"}, strSettings: {org: "Einstellungen"}};
+  $mod.$resourcestrings = {strReports: {org: "Berichte"}, strContent: {org: "Inhalt"}, strExecute: {org: "Ausführen"}, strNoReport: {org: "kein Bericht verfügbar !"}, strSettings: {org: "Einstellungen"}, strRawData: {org: "Daten"}};
   $mod.$init = function () {
     if (pas.Avamm.getRight("STATISTICS") > 0) pas.Avamm.RegisterSidebarRoute(rtl.getResStr(pas.statistics,"strReports"),"statistics",$mod.ShowStatistics,"fa-file-text");
     pas.webrouter.Router().RegisterRoute("\/statistics\/by-id\/:Id\/:Params",$mod.ShowStatistic,false);

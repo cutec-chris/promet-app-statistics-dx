@@ -21,6 +21,7 @@ type
     procedure ContToolBarClicked(id : string);
     procedure DoOpen;
     procedure DoExecute;
+    procedure ShowData;
   end;
 
 resourcestring
@@ -29,6 +30,7 @@ resourcestring
   strExecute             = 'Ausführen';
   strNoReport            = 'kein Bericht verfügbar !';
   strSettings            = 'Einstellungen';
+  strRawData             = 'Daten';
 
 var
   Statistics : TAvammListForm = nil;
@@ -77,6 +79,10 @@ procedure TStatisticsForm.CreateForm;
       begin
         DoExecute;
       end
+    else if (id='rawdata') then
+      begin
+        ShowData;
+      end
     ;
   end;
 begin
@@ -86,6 +92,7 @@ begin
   Form.hideItem('lCommon');
   TJSHTMLElement(Tabs.cont.children.item(0).childNodes.item(0)).style.setProperty('height','0px');
   Toolbar.addButton('execute',0,strExecute,'fa fa-pie-chart','fa fa-pie-chart');
+  Toolbar.addButton('rawdata',8,strRawData,'fa fa-table','fa fa-table');
   Form.addItem(null,js.new(['type','label','label',strSettings,'hidden',true,'name','lSettings']));
   Toolbar.attachEvent('onClick', @ToolbarButtonClick);
   ContentForm := Form;
@@ -321,6 +328,37 @@ var
 begin
   Layout.progressOn;
   ReportsLoaded._then(TJSPromiseresolver(@DoLoadPDF));
+end;
+
+procedure TStatisticsForm.ShowData;
+function DoShowData(aValue: TJSXMLHttpRequest): JSValue;
+begin
+  Layout.progressOff;
+end;
+
+function DoLoadIData(aValue: TJSXMLHttpRequest): JSValue;
+var
+  aName,aExt, aUrl: String;
+  i: Integer;
+  ReportLoaded: Boolean = False;
+
+  procedure AddParamToUrl(aParam : string);
+  begin
+    if (ContentForm.getUserData(aParam,'statistics', 'n') = 'y') then
+      aUrl := aUrl+'&'+aParam+'='+string(ContentForm.getItemValue(aParam));
+  end;
+begin
+  //Build Params
+  aUrl := '/'+TableName+'/by-id/'+string(Id)+'/rawdata.json';
+  aUrl := aUrl+'?exec=1';
+  ContentForm.forEachItem(@AddParamToUrl);
+  //Load Data
+  LoadData(aUrl,False,'',15000)._then(TJSPromiseResolver(@DoShowData));
+  exit;
+end;
+begin
+  Layout.progressOn;
+  ReportsLoaded._then(TJSPromiseresolver(@DoLoadIData));
 end;
 
 initialization
